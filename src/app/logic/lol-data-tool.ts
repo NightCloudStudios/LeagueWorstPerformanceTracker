@@ -18,7 +18,7 @@ interface SummonerMatchIDs {
   matchID: string[];
 }
 
-interface SummonerData {
+export interface SummonerData {
   queueType: string;
   championName: string;
   kills: number;
@@ -135,8 +135,9 @@ async function checkGames(games: SummonerMatchIDs, playerPuuid: string) {
 
     //Not found
     if (pos == -1) {
-      console.log(`PlayerPuuid: ${playerPuuid} can not be found in this match`);
-      return null;
+      // console.log(`PlayerPuuid: ${playerPuuid} can not be found in this match`);
+      throw Error(`PlayerPuuid: ${playerPuuid} can not be found in this match`); //Idk if should do this
+      // return null;
     }
 
     PlayerData.push(gameDetails.info.participants[pos]);
@@ -169,16 +170,17 @@ async function checkGames(games: SummonerMatchIDs, playerPuuid: string) {
   return worstGames;
 }
 
-const doThing = async () => {
+export const fetchAllMatchData = async () => {
   try {
     const player = await GetSummonerData("europe", SUMMONER_NAME, SUMMONER_TAG); //Get Id
     //console.log(res.puuid);
     const matches = await GetMatches("europe", player.puuid); // Get matches this ID played in
 
-    const worstGames = checkGames(matches, player.puuid); //Check each match get data and compare to find worst.
-  } catch {
-    console.log("GetSummonerData Failed");
+    const worstGames = await checkGames(matches, player.puuid); //Check each match get data and compare to find worst.
+    return worstGames;
+  } catch (error) {
+    console.log("GetSummonerData Failed: ", error);
   }
 };
 
-doThing();
+// fetchAllMatchData(); //for unit testing
