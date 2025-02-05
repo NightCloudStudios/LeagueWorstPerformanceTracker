@@ -170,7 +170,7 @@ async function checkGames(games: SummonerMatchIDs, playerPuuid: string) {
   return worstGames;
 }
 
-export const fetchAllMatchData = async () => {
+export const fetchAllMatchData = async (server:string, summoner:string) => {
   try {
     const player = await GetSummonerData("europe", SUMMONER_NAME, SUMMONER_TAG); //Get Id
     //console.log(res.puuid);
