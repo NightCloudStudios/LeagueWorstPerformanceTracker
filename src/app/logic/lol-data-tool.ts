@@ -1,5 +1,3 @@
-import { reverse } from "dns";
-
 const API_KEY: string = "ENTER_API_HERE";
 
 const SUMMONER_NAME: string = "JustExisting";
