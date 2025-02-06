@@ -7,8 +7,9 @@ const SUMMONER_TAG: string = "ALUNE";
 // const urlBase = ".api.riotgames.com";
 // const urlPathData = "/lol/league/v4/entries/by-summoner/";
 // const urlPathName = "/lol/summoner/v4/summoners/by-name/";
-//const urlSearchParams: string = `?api_key=${process.env.RIOT_DEV_TOKEN}`;
-const apiKeyUrl: string = `?api_key=${API_KEY}`;
+// const urlSearchParams: string = `?api_key=${process.env.RIOT_DEV_TOKEN}`;
+const apiKeyUrl = `?api_key=${process.env.RIOT_KEY}`;
+const key: string = process.env.RIOT_KEY as string;
 
 interface SummonerId {
   puuid: string;
@@ -18,7 +19,7 @@ interface SummonerMatchIDs {
   matchID: string[];
 }
 
-interface SummonerData {
+export interface SummonerData {
   queueType: string;
   championName: string;
   kills: number;
@@ -50,7 +51,6 @@ const GetSummonerData = async (
   summonerTag: string
 ): Promise<SummonerId> => {
   const url = `https://${platform}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${summonerName}/${summonerTag}${apiKeyUrl}`;
-
   const request: RequestInfo = new Request(url, {
     method: "GET",
   });
@@ -62,10 +62,8 @@ const GetSummonerData = async (
     if (errorCodes.has(responce.status)) {
       throw resBody; //throw goes to the closest catch
     }
-
     return resBody as SummonerId;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -123,39 +121,78 @@ const GetMatchData = async (
 
 async function checkGames(games: SummonerMatchIDs, playerPuuid: string) {
   const PlayerData: SummonerData[] = [];
+
+  //My Way
+
+  games.matchID.forEach(async (matchId) => {
+    console.log(`Checking ${matchId}`);
+
+    const gameDetails = await GetMatchData("europe", matchId);
+
+    const pos = gameDetails.metadata.participants.indexOf(playerPuuid);
+
+    //Not found
+    if (pos == -1) {
+      // console.log(`PlayerPuuid: ${playerPuuid} can not be found in this match`);
+      throw Error(`PlayerPuuid: ${playerPuuid} can not be found in this match`); //Idk if should do this
+      // return null;
+    }
+
+    PlayerData.push(gameDetails.info.participants[pos]);
+  });
+
+  /*  Your way
+
   for (const _MatchID of games.matchID) {
     console.log(`Checking ${_MatchID}`);
 
     const gameDetails = await GetMatchData("europe", _MatchID);
 
-    // const playerArrayPos = 0;
+    // const playerArrayPos = 0 placed lower
     gameDetails.metadata.participants.forEach((player) => {
       if (player == playerPuuid) {
         const playerArrayPos =
           gameDetails.metadata.participants.indexOf(player);
-        // const pD = gameDetails.info.participants[playerArrayPos];
+        const pD = gameDetails.info.participants[playerArrayPos];
 
         PlayerData.push(gameDetails.info.participants[playerArrayPos]);
       }
     });
   }
+    */
 
   PlayerData.sort((a, b) => b.kills / b.deaths - a.kills / a.deaths).reverse();
-  const resData = PlayerData.slice(0, 3);
+  const worstGames = PlayerData.slice(0, 3);
 
-  console.log(resData);
+  console.log(worstGames);
+  return worstGames;
 }
 
-const doThing = async () => {
-  try {
-    const res = await GetSummonerData("europe", SUMMONER_NAME, SUMMONER_TAG); //Get Id
-    //console.log(res.puuid);
-    const matches = await GetMatches("europe", res.puuid); // Get matches this ID played in
+export const fetchAllMatchData = async (server: string, summoner: string) => {
+  const name = summoner.split("#");
 
-    checkGames(matches, res.puuid); //Check each match get data and compare to find worst.
-  } catch {
-    console.log("GetSummonerData Failed");
+  try {
+    // console.log(`Fetching: ${server + summoner}`);
+    // const player = await GetSummonerData("europe", SUMMONER_NAME, SUMMONER_TAG); //Get Id
+    const player = await GetSummonerData("europe", name[0], name[1]); //Get Id
+
+    //console.log(res.puuid);
+    const matches = await GetMatches("europe", player.puuid); // Get matches this ID played in
+
+    const worstGames = await checkGames(matches, player.puuid); //Check each match get data and compare to find worst.
+
+    return worstGames;
+  } catch (error) {
+    console.log("GetSummonerData Failed: ", error);
   }
 };
 
-doThing();
+// fetchAllMatchData(); //for unit testing
+
+/*
+
+
+https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/qPC4O7VArE-qX22aT5R5bVxXJzLLupVG1czFXKNGkz_Rns8tboGk-A3yDRw7oF0O_lJBtbRQcfcItQ?api_key=RGAPI-df40b1cb-fe8c-4445-bf84-3c406fb9dbc1
+
+
+*/
