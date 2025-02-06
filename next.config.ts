@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   // basePath: "/LeagueWorstPerformanceTracker", FOR GIT PAGES ONLY
   // output: "export",  // <=== enables static exports
   reactStrictMode: true,
+  env: {
+    RIOT_KEY: process.env.RIOT_KEY,
+  }
 };
 
 export default nextConfig;

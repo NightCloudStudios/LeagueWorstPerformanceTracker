@@ -27,8 +27,13 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <SearchBar />
-        <main className="bg-slate-900">{children}</main>
+        <main className="bg-slate-800 min-h-dvh flex flex-col">
+          <SearchBar />
+          <div className="flex grow place-content-center">{children}</div>
+          <footer className="flex w-full place-content-center bg-black">
+            <div className="w-fit">Footer Stuff</div>
+          </footer>
+        </main>
       </body>
     </html>
   );

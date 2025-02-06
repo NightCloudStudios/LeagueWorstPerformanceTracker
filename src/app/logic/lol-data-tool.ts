@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+
 const API_KEY: string = "ENTER_API_HERE";
 
 const SUMMONER_NAME: string = "JustExisting";
@@ -7,8 +9,9 @@ const REGION: string = "euw1";
 const urlBase = ".api.riotgames.com";
 const urlPathData = "/lol/league/v4/entries/by-summoner/";
 const urlPathName = "/lol/summoner/v4/summoners/by-name/";
-//const urlSearchParams: string = `?api_key=${process.env.RIOT_DEV_TOKEN}`;
-const apiKeyUrl: string = `?api_key=${API_KEY}`;
+// const urlSearchParams: string = `?api_key=${process.env.RIOT_DEV_TOKEN}`;
+const apiKeyUrl = `?api_key=${process.env.RIOT_KEY}`;
+const key: string = process.env.RIOT_KEY as string;
 
 interface SummonerId {
   puuid: string;
@@ -50,7 +53,6 @@ const GetSummonerData = async (
   summonerTag: string
 ): Promise<SummonerId> => {
   const url = `https://${platform}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${summonerName}/${summonerTag}${apiKeyUrl}`;
-
   const request: RequestInfo = new Request(url, {
     method: "GET",
   });
@@ -62,10 +64,8 @@ const GetSummonerData = async (
     if (errorCodes.has(responce.status)) {
       throw resBody; //throw goes to the closest catch
     }
-
     return resBody as SummonerId;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -170,13 +170,19 @@ async function checkGames(games: SummonerMatchIDs, playerPuuid: string) {
   return worstGames;
 }
 
-export const fetchAllMatchData = async (server:string, summoner:string) => {
+export const fetchAllMatchData = async (server: string, summoner: string) => {
+  const name = summoner.split("#");
+
   try {
-    const player = await GetSummonerData("europe", SUMMONER_NAME, SUMMONER_TAG); //Get Id
+    // console.log(`Fetching: ${server + summoner}`);
+    // const player = await GetSummonerData("europe", SUMMONER_NAME, SUMMONER_TAG); //Get Id
+    const player = await GetSummonerData("europe", name[0], name[1]); //Get Id
+
     //console.log(res.puuid);
     const matches = await GetMatches("europe", player.puuid); // Get matches this ID played in
 
     const worstGames = await checkGames(matches, player.puuid); //Check each match get data and compare to find worst.
+
     return worstGames;
   } catch (error) {
     console.log("GetSummonerData Failed: ", error);
@@ -184,3 +190,11 @@ export const fetchAllMatchData = async (server:string, summoner:string) => {
 };
 
 // fetchAllMatchData(); //for unit testing
+
+/*
+
+
+https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/qPC4O7VArE-qX22aT5R5bVxXJzLLupVG1czFXKNGkz_Rns8tboGk-A3yDRw7oF0O_lJBtbRQcfcItQ?api_key=RGAPI-df40b1cb-fe8c-4445-bf84-3c406fb9dbc1
+
+
+*/

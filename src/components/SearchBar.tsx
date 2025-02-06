@@ -22,7 +22,7 @@ export default function SearchBar() {
         action={formSub}>
         <div className="flex h-full w-auto text-end bg-slate-600 rounded-l-md">
           <select className="bg-inherit self-center" name="region">
-            <option value="EUW">EUW1</option>
+            <option value="EUW1">EUW1</option>
             <option value="EUW2">EWU2</option>
           </select>
         </div>
