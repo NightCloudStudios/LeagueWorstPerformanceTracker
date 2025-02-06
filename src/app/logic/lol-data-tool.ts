@@ -1,14 +1,12 @@
-import { headers } from "next/headers";
-
 const API_KEY: string = "ENTER_API_HERE";
 
 const SUMMONER_NAME: string = "JustExisting";
 const SUMMONER_TAG: string = "ALUNE";
-const REGION: string = "euw1";
+// const REGION: string = "euw1";
 
-const urlBase = ".api.riotgames.com";
-const urlPathData = "/lol/league/v4/entries/by-summoner/";
-const urlPathName = "/lol/summoner/v4/summoners/by-name/";
+// const urlBase = ".api.riotgames.com";
+// const urlPathData = "/lol/league/v4/entries/by-summoner/";
+// const urlPathName = "/lol/summoner/v4/summoners/by-name/";
 // const urlSearchParams: string = `?api_key=${process.env.RIOT_DEV_TOKEN}`;
 const apiKeyUrl = `?api_key=${process.env.RIOT_KEY}`;
 const key: string = process.env.RIOT_KEY as string;
